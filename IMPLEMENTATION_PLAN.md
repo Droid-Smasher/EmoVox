@@ -15,11 +15,14 @@ graph TD
         B[FastAPI Backend<br/>• WebSocket /ws/stream<br/>• HTTP /upload<br/>• Real-time orchestration]
     end
 
-    subgraph "Azure Cloud Services"
+    subgraph "Azure AI Services"
         C[Azure Speech Service<br/>Audio → Text]
         D[Azure AI Language<br/>Text → Sentiment]
-        E[Azure Blob Storage<br/>Audio/Video Files]
-        F[Azure Table Storage<br/>Session Metadata]
+    end
+
+    subgraph "Local Storage"
+        E[Local File System<br/>data/audio/, data/video/]
+        F[SQLite Database<br/>data/sessions.db]
     end
 
     subgraph "Open-Source Processing"
@@ -51,8 +54,8 @@ graph TD
 
     style C fill:#0078D4,color:#fff
     style D fill:#0078D4,color:#fff
-    style E fill:#0078D4,color:#fff
-    style F fill:#0078D4,color:#fff
+    style E fill:#28a745,color:#fff
+    style F fill:#28a745,color:#fff
     style G fill:#ff6b35,color:#fff
     style H fill:#ff6b35,color:#fff
     style I fill:#ff6b35,color:#fff
@@ -64,12 +67,18 @@ graph TD
 
 #### Azure SDK Components
 ```bash
-# Core Azure Services
+# Core Azure AI Services (Heavy Lifting)
 azure-cognitiveservices-speech==1.45.0
-azure-storage-blob==12.19.0
-azure-data-tables==12.4.0
 azure-ai-textanalytics==5.3.0
 azure-identity==1.15.0
+```
+
+#### Local Storage Dependencies
+```bash
+# SQLite for local database
+sqlite3  # Built-in with Python
+aiofiles==23.2.1  # Async file operations
+pathlib  # Built-in for file path handling
 ```
 
 #### Open-Source ML Libraries
@@ -125,11 +134,9 @@ aiofiles==23.2.1
 
 #### 1.1 Azure Resource Configuration
 ```bash
-# Required Azure Resources
+# Required Azure AI Services (Heavy Lifting Only)
 - Azure Speech Service (Standard tier)
-- Azure AI Language Service  
-- Azure Blob Storage (Standard performance)
-- Azure Table Storage
+- Azure AI Language Service
 - Resource Group: "emovox-hackathon"
 - Location: "East US" or "West Europe"
 ```
@@ -141,8 +148,12 @@ AZURE_SPEECH_KEY=your_speech_service_key
 AZURE_SPEECH_REGION=eastus
 AZURE_LANGUAGE_KEY=your_language_service_key
 AZURE_LANGUAGE_ENDPOINT=https://your-endpoint.cognitiveservices.azure.com/
-AZURE_STORAGE_CONNECTION_STRING=your_storage_connection_string
-AZURE_TABLE_CONNECTION_STRING=your_table_connection_string
+
+# Local Storage Configuration
+LOCAL_STORAGE_PATH=./data
+AUDIO_STORAGE_PATH=./data/audio
+VIDEO_STORAGE_PATH=./data/video
+DATABASE_PATH=./data/sessions.db
 ```
 
 ### Phase 2: FastAPI Backend Development
@@ -158,7 +169,7 @@ backend/
 ├── services/
 │   ├── azure_speech.py    # Speech-to-text service
 │   ├── azure_language.py  # Text sentiment analysis
-│   ├── azure_storage.py   # Blob & table storage
+│   ├── local_storage.py   # Local file & SQLite storage
 │   ├── deepface_service.py # Facial emotion recognition
 │   ├── whisper_service.py  # Audio emotion recognition
 │   ├── breathing_service.py # Breathing analysis
